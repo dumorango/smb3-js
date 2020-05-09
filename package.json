@@ -7,10 +7,14 @@
   "private": false,
   "scripts": {
     "start": "webpack-dev-server --open",
-    "build": "webpack --config webpack.config.js --progress"
+    "build": "webpack --config webpack.config.js --progress",
+    "test": "jest"
   },
   "devDependencies": {
+    "@types/jest": "^25.2.1",
     "html-webpack-plugin": "^4.3.0",
+    "jest": "25.5.4",
+    "ts-jest": "^25.5.1",
     "ts-loader": "^7.0.2",
     "typescript": "^3.8.3",
     "webpack": "^4.43.0",
