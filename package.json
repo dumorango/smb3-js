@@ -12,8 +12,9 @@
   },
   "devDependencies": {
     "@types/jest": "^25.2.1",
+    "file-loader": "^6.0.0",
     "html-webpack-plugin": "^4.3.0",
-    "jest": "25.5.4",
+    "jest": "26.0.0",
     "ts-jest": "^25.5.1",
     "ts-loader": "^7.0.2",
     "typescript": "^3.8.3",
