@@ -3,6 +3,7 @@ module.exports = {
   testEnvironment: "jsdom",
   collectCoverage: true,
   collectCoverageFrom: ["src/**/*.ts"],
+  testMatch: ["**/?(*.)+(spec|test).[t]s?(x)"],
   coverageThreshold: {
     global: {
       statements: 85,
