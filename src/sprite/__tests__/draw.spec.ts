@@ -9,7 +9,10 @@ const canvasContextMock = {
 
 describe("The draw module", () => {
   it("should draw a sprite", () => {
-    const drawImgSprite = draw.drawSprite({ img, position, size });
+    const drawImgSprite = draw.drawSprite({
+      img,
+      coordinates: { position, size },
+    });
     const drawImgSpriteOnPosition = drawImgSprite(position);
     drawImgSpriteOnPosition(canvasContextMock);
     expect(drawImage).toHaveBeenCalledWith(
@@ -23,11 +26,5 @@ describe("The draw module", () => {
       size.width,
       size.height
     );
-  });
-  it("should draw a sprite pattern", async () => {
-    const drawSpriteSpy = jest.spyOn(draw, "drawSprite");
-    const pattern = [[sprite, sprite]];
-    draw.drawSpritePattern(pattern, position)(canvasContextMock);
-    expect(drawSpriteSpy).toHaveBeenNthCalledWith(2, sprite);
   });
 });

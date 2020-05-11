@@ -8,10 +8,14 @@ export type Size = {
   width: number;
 };
 
-export type Sprite = {
-  img: HTMLImageElement;
+export type SpriteCoordinates = {
   position: Position;
   size: Size;
+};
+
+export type Sprite = {
+  img: HTMLImageElement;
+  coordinates: SpriteCoordinates;
 };
 
 export type SpritePattern = Sprite[][];
