@@ -11,8 +11,8 @@ export const TILE_SPRITES_MAP = new Map([
   [
     Tile.SKY,
     {
-      x: 20,
-      y: 5,
+      x: 38,
+      y: 1,
     },
   ],
   [

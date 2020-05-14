@@ -8,14 +8,14 @@ const TILE_PADDING = 1;
 
 export const getBackgroundLayer = () => {
   const ground1Placement = {
-    pattern: createGroundPattern(15),
+    pattern: createGroundPattern(16),
     position: {
       x: 0,
       y: 13,
     },
   };
   const skyPatternPlacement = {
-    pattern: createSkyPattern({ length: 15, height: 15 }),
+    pattern: createSkyPattern({ length: 16, height: 15 }),
     position: {
       x: 0,
       y: 0,

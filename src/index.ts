@@ -6,9 +6,9 @@ import { getStage } from "./design";
 
 const canvas = document.createElement("canvas");
 
-canvas.width = 640;
+canvas.width = 256 * 3;
 
-canvas.height = 640;
+canvas.height = 240 * 3;
 
 document.body.appendChild(canvas);
 
@@ -16,6 +16,11 @@ const canvasContext = canvas.getContext("2d");
 
 if (!canvasContext) throw Error("Error getting canvas context");
 
+canvasContext.imageSmoothingEnabled = false;
+
+canvasContext.filter = "none";
+
+canvasContext.scale(3, 3);
 const loadGame = async () => {
   const marioSprite = await loadMarioSprite();
 
