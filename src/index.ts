@@ -1,57 +1,83 @@
-/* istanbul ignore file */
-import { loadMarioSprite } from "./player";
-import { getStageSpritesPlacements, loadStageLayersImage } from "./stage";
-import { drawSprite, Position } from "./sprite";
+import { getHitBox } from './collision/hitbox';
+import { makeApplyCollisionWithStage, makeApplyCollisionWithEnemy } from "./stage/colision";
+import { getFrameStream } from "./frame-animation";
+import { makeDrawStage } from "./draw";
 import { getStage } from "./design";
+import { Input, getInputStream } from "./input";
+import {
+  makeApplyMovement,
+  getPlayerMovementStreamByInput,
+} from "./movement";
+import { canvasContext } from "./canvas";
 
-const canvas = document.createElement("canvas");
+import {
+  getMovement,
+  setMovement,
+  accelerationConfig,
+  getState,
+  setEnemies,
+  setPlayer,
+  setState,
+} from "./state";
+import { getSprite } from "./stage/enemies";
+import { getStageState } from './stage';
 
-canvas.width = 640;
-
-canvas.height = 640;
-
-document.body.appendChild(canvas);
-
-const canvasContext = canvas.getContext("2d");
-
-if (!canvasContext) throw Error("Error getting canvas context");
+const keyMap = new Map<Input, string>([
+  ["RIGHT", "KeyD"],
+  ["LEFT", "KeyA"],
+  ["JUMP", "KeyJ"],
+]);
 
 const loadGame = async () => {
-  const marioSprite = await loadMarioSprite();
+  const mainStageDesign = getStage();
 
-  const drawMario = drawSprite(marioSprite);
+  const mainStageState = getStageState(mainStageDesign);
+  
+  setState(mainStageState);
 
-  const mainStage = getStage();
+  const draw = await makeDrawStage(canvasContext); 
 
-  const loadedMainStage = await loadStageLayersImage(mainStage);
+  const applyMovement = makeApplyMovement(accelerationConfig);
+  
+  (async () => {
+    while (!(await getFrameStream().next()).done) {
+      let state = getState();
+      let { mario, enemies } = state;
 
-  const mainStageSpritePlacements = [
-    ...getStageSpritesPlacements(loadedMainStage),
-  ];
+      const applyCollition = makeApplyCollisionWithStage(state);
 
-  const drawMainStage = () => {
-    for (const { sprite, position } of [...mainStageSpritePlacements]) {
-      drawSprite(sprite)(position)(canvasContext);
+      const playerHitBox = getHitBox(mario.movement.position, mario.sprite.coordinates.size);
+
+      const nextFrameMovement = applyMovement(mario.movement);
+
+      const newMovement = applyCollition(nextFrameMovement, playerHitBox, [], mario.sprite.coordinates);
+
+      const newEnemies = enemies.map((enemy) => {
+        const sprite = getSprite(enemy.type);        
+        const hitBox = getHitBox(enemy.movement.position, sprite.size); 
+        const applyCollitionWithEnemy = makeApplyCollisionWithEnemy(enemy);
+        const [newPlayerState, newEnemyState] = applyCollitionWithEnemy(playerHitBox, mario);
+        mario = newPlayerState;
+        return {
+          ...newEnemyState,
+          movement: applyCollition(applyMovement(enemy.movement), hitBox, enemy.traits, sprite),          
+        };
+      });
+
+      setEnemies(newEnemies);
+
+      setMovement(newMovement);
+      setPlayer(mario);
+      draw(getState());
     }
-  };
-
-  const update = (position: Position) => {
-    drawMainStage();
-    drawMario(position)(canvasContext);
-    requestAnimationFrame(() =>
-      update({
-        x: position.x + 1,
-        y: position.y,
-      })
-    );
-  };
-
-  const initialPosition = {
-    x: 20,
-    y: 12 * 16,
-  };
-
-  update(initialPosition);
+  })();
+  (async () => {
+    for await (const applyMovement of getPlayerMovementStreamByInput(
+      getInputStream(keyMap)
+    )) {
+      setMovement(applyMovement(getMovement()));
+    }
+  })();
 };
 
 loadGame();

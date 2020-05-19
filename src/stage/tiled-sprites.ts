@@ -1,37 +1,70 @@
-import { TileSpecs, Position, LoadedStage } from "./types";
-import { getTilePlacements } from "./tiled-layout";
+import { SpriteImage } from "../sprite/types";
+import {
+  Position,
+  SpritePlacement,
+  PatternState,
+  Tile,
+  Pattern,
+} from "./types";
+import { getPatternTiles } from "./patterns";
+import { TILE_SPRITES_MAP, TILE_PADDING, TILE_SIZE } from "./tiles";
 
-const getSpriteCoordinates = (
-  { x, y }: Position,
-  { size, padding }: TileSpecs
-) => {
-  const sizeWithPadding = size + padding;
+const getSpriteCoordinates = ({ x, y }: Position) => {
+  const sizeWithPadding = TILE_SIZE + TILE_PADDING;
   return {
     position: {
-      x: x * sizeWithPadding + padding,
-      y: y * sizeWithPadding + padding,
+      x: x * sizeWithPadding + TILE_PADDING,
+      y: y * sizeWithPadding + TILE_PADDING,
     },
     size: {
-      height: size,
-      width: size,
+      height: TILE_SIZE,
+      width: TILE_SIZE,
     },
   };
 };
 
-export function* getStageSpritesPlacements<Tile>(stage: LoadedStage<Tile>) {
-  const { layers } = stage;
-  for (const { img, layout, tileMap } of layers) {
-    for (const { position, tile } of getTilePlacements(layout)) {
-      const tilePosition = tileMap.get(tile);
-      if (!tilePosition)
-        throw new Error(`Tile ${tile} not defined on tile maps`);
+const getTileSprite = (tile: Tile) => {
+  const tilePosition = TILE_SPRITES_MAP.get(tile);
+  if (!tilePosition) throw new Error(`Tile not mapped ${tile}`);
+  const coordinates = getSpriteCoordinates(tilePosition);
+  return {
+    image: SpriteImage.BACKGROUND,
+    coordinates,
+  };
+};
+
+function* getTilesSpricePlacements(tiles: Tile[][], position: Position) {  
+  const startingPosition = {
+    x: position.x,
+    y: position.y,
+  };
+  for (let [j, line] of tiles.entries()) {
+    for (let [i, tile] of line.entries()) {
+      const sprite = getTileSprite(tile);
+      const offset = {
+        x: i * TILE_SIZE,
+        y: j * TILE_SIZE,
+      };
+      const position = {
+        x: startingPosition.x + offset.x,
+        y: startingPosition.y + offset.y,
+      };
       yield {
-        sprite: {
-          img,
-          coordinates: getSpriteCoordinates(tilePosition, layout.tileSpecs),
-        },
+        sprite,
         position,
       };
     }
+  }
+}
+
+export function* getPatternStateSpritePlacements(
+  patternsState: PatternState[]
+): Generator<SpritePlacement> {
+  for (const {
+    movement: { position },
+    pattern,
+  } of patternsState) {
+    const tiles = getPatternTiles(pattern);
+    yield* getTilesSpricePlacements(tiles, position);
   }
 }
