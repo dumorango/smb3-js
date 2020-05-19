@@ -1,3 +1,10 @@
+export enum SpriteImage {
+  MARIO = "MARIO",
+  BACKGROUND = "BACKGROUND",
+  ENEMIES = "ENEMIES",
+}
+
+
 export type Position = {
   x: number;
   y: number;
@@ -14,7 +21,7 @@ export type SpriteCoordinates = {
 };
 
 export type Sprite = {
-  img: HTMLImageElement;
+  image: SpriteImage;
   coordinates: SpriteCoordinates;
 };
 

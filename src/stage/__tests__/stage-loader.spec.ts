@@ -1,29 +1,47 @@
-import { Stage } from "./../types";
-import { loadStageLayersImage } from "../stage-loader";
-import { loadImage } from "../../loaders";
+import { EnemyType, PatternType, Pattern } from '../types';
+import { getStageState } from "../stage-loader";
 
-jest.mock("../../loaders");
+const position = { x: 0, y: 0 };
+const velocity = { x: 0, y: 0 };
+const acceleration = { x: 0, y: 0 };
+const movement = {
+  position,
+  velocity,
+  acceleration
+}
+const layers = [{
+  patterns: [{
+    pattern: {
+      type: PatternType.BRICK
+    } as Pattern,
+    position        
+  }]      
+}];    
+const stage = {
+  layers,
+  enemies: [{
+    type: EnemyType.GOOMBA,
+    position
+  }],
+  player: {
+    position
+  }
+};    
 
 describe("The stage loader module", () => {
-  it("should load the stage layers images", async () => {
-    const imageFile = "imagepath.png";
-    const img = document.createElement("img");
-    const layers = [
-      {
-        imageFile,
-      },
-    ];
-    const stage = {
-      layers,
-    } as Stage<any>;
-    (loadImage as jest.Mock).mockResolvedValue(img);
-    const response = await loadStageLayersImage(stage);
-    expect(response).toMatchObject({
-      layers: [
-        {
-          img,
-        },
-      ],
-    });
+  it("should load the stage state from a stage design", async () => {    
+    const response = await getStageState(stage); //?
+    expect(response).toMatchSnapshot();
+  });
+  it("should throw and error when an enemy is not defined", async () => {
+    stage.enemies.push({
+      type: "UNKNOWN_EMEMY" as EnemyType,
+      position
+    })
+    try {
+      await getStageState(stage);
+    } catch (e) {
+      expect(e.message).toContain("Enemy type not found")
+    }
   });
 });

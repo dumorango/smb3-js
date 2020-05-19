@@ -1,20 +1,38 @@
 import * as draw from "../draw";
 import { img, position, size, sprite } from "./type-mocks";
+import { SpriteImage } from "../types";
 
 const drawImage = jest.fn();
+const drawRect = jest.fn();
+const beginPath = jest.fn();
+const rect = jest.fn();
+const stroke = jest.fn();
 
 const canvasContextMock = {
-  drawImage: drawImage as any,
-} as CanvasRenderingContext2D;
+  drawImage,
+  drawRect,
+  beginPath,
+  rect,
+  stroke,
+};
+
+const spriteImages = new Map([[SpriteImage.BACKGROUND, img]]);
 
 describe("The draw module", () => {
+  beforeEach(() => {
+    //@ts-ignore
+    // canvasContextMock.mockReset();
+  });
   it("should draw a sprite", () => {
-    const drawImgSprite = draw.drawSprite({
-      img,
-      coordinates: { position, size },
-    });
-    const drawImgSpriteOnPosition = drawImgSprite(position);
-    drawImgSpriteOnPosition(canvasContextMock);
+    const ctx = (canvasContextMock as unknown) as CanvasRenderingContext2D;
+    const drawImgSprite = draw.makeDrawSprite(ctx, spriteImages)(
+      {
+        image: SpriteImage.BACKGROUND,
+        coordinates: { position, size },
+      },
+      true
+    );
+    drawImgSprite(position);
     expect(drawImage).toHaveBeenCalledWith(
       img,
       position.x,
@@ -26,5 +44,13 @@ describe("The draw module", () => {
       size.width,
       size.height
     );
+    expect(beginPath).toHaveBeenCalledWith();
+    expect(rect).toHaveBeenCalledWith(
+      position.x,
+      position.y,
+      size.width,
+      size.height
+    );
+    expect(stroke).toHaveBeenCalledTimes(1);
   });
 });
