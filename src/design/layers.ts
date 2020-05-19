@@ -1,37 +1,72 @@
 /* istanbul ignore file */
-import { createGroundPattern, createSkyPattern } from "./patterns";
-import BackgroundImage from "../img/smb3_background_tiles.png";
-import { TILE_SPRITES_MAP } from "./tiles";
 
-const TILE_SIZE = 16;
-const TILE_PADDING = 1;
+import { TiledLayerDesign } from "./../stage/";
+import {
+  PatternType,
+  GroundPattern,
+  PipePattern,
+  SkyPattern,
+  BrickPattern,
+} from "./../stage/types";
 
-export const getBackgroundLayer = () => {
-  const ground1Placement = {
-    pattern: createGroundPattern(16),
-    position: {
-      x: 0,
-      y: 13,
-    },
+export const getBackgroundLayer = (): TiledLayerDesign => {
+  const sky: SkyPattern = {
+    type: PatternType.SKY,
+    size: { width: 16, height: 15 },
   };
-  const skyPatternPlacement = {
-    pattern: createSkyPattern({ length: 16, height: 15 }),
+  const skySpawnPoint = {
+    pattern: sky,
     position: {
       x: 0,
       y: 0,
     },
   };
-  const patterns = [skyPatternPlacement, ground1Placement];
-
-  return {
-    imageFile: BackgroundImage,
-    layout: {
-      tileSpecs: {
-        size: TILE_SIZE,
-        padding: TILE_PADDING,
-      },
-      patterns,
+  const ground: GroundPattern = {
+    type: PatternType.GROUND,
+    length: 16,
+  };
+  const groundSpawnPoint = {
+    pattern: ground,
+    position: {
+      x: 0,
+      y: 13,
     },
-    tileMap: TILE_SPRITES_MAP,
+  };
+  const pipe: PipePattern = {
+    type: PatternType.PIPE,
+    height: 2,
+  };
+  const pipePatternSpawnPoint = {
+    pattern: pipe,
+    position: {
+      x: 5,
+      y: 11,
+    },
+  };
+  const pipePatternSpawnPoint2 = {
+    pattern: pipe,
+    position: {
+      x: 15,
+      y: 11,
+    },
+  };
+  const brick: BrickPattern = {
+    type: PatternType.BRICK,
+  };
+  const brickSpawn = {
+    pattern: brick,
+    position: {
+      x: 4,
+      y: 9,
+    },
+  };
+  return {
+    patterns: [
+      skySpawnPoint,
+      groundSpawnPoint,
+      pipePatternSpawnPoint,
+      pipePatternSpawnPoint2,
+      brickSpawn,
+    ],
   };
 };
