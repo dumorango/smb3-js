@@ -1,7 +1,7 @@
 import { PlayerState, StageState, PatternState } from "./types/state";
 import { Movement } from "../movement/types";
 import { getHitBox } from "../collision/hitbox";
-import { EnemyState } from ".";
+import { EnemyState, getSprite } from ".";
 import { SpriteCoordinates, Size } from "../sprite";
 import { Trait } from "./types/trait";
 import { getColitionHit } from "../collision";
@@ -42,7 +42,7 @@ function makeHasColided(stage: StageState) {
         yield {
           hitSide,
           hitBox: patternHitBox,
-          patternState
+          patternState,
         };
       }
     }
@@ -101,7 +101,8 @@ const turnAroundOnCollideHorizontally = (
   };
 };
 
-export const makeApplyCollisionWithStage = (stage: StageState) => (
+const applyCollisionWithStage = (
+  stage: StageState,
   movement: Movement,
   spriteHitbox: HitBox,
   traits: Trait[],
@@ -109,11 +110,9 @@ export const makeApplyCollisionWithStage = (stage: StageState) => (
 ): Movement => {
   let newMovement = movement;
   const hasColidedWithStageTiles = makeHasColided(stage);
-  for (const {
-    patternState,
-    hitSide,
-    hitBox,
-  } of hasColidedWithStageTiles(spriteHitbox)) {
+  for (const { patternState, hitSide, hitBox } of hasColidedWithStageTiles(
+    spriteHitbox
+  )) {
     if (patternState.traits?.includes(Trait.SOLID)) {
       if (traits.includes(Trait.SIDEWAYS_WALKER)) {
         newMovement = turnAroundOnCollideHorizontally(
@@ -128,15 +127,17 @@ export const makeApplyCollisionWithStage = (stage: StageState) => (
           ...stopOnColideSolid(hitSide as HitSide, hitBox, newMovement, size),
         };
       }
-    } else if(patternState.traits?.includes(Trait.BREAKABLE)) {
+    } else if (patternState.traits?.includes(Trait.BREAKABLE)) {
     }
   }
   return newMovement;
 };
 
-export const makeApplyCollisionWithEnemy = (enemyState: EnemyState) => (
+const applyCollisionWithEnemy = (
+  enemyState: EnemyState,
   spriteHitbox: HitBox,
-  playerState: PlayerState): [PlayerState, EnemyState] => {
+  playerState: PlayerState
+): [PlayerState, EnemyState] => {
   const enemyHitbox = getEnemyHitBox(enemyState);
   const colitionHit = getColitionHit(spriteHitbox, enemyHitbox);
   if (
@@ -149,11 +150,48 @@ export const makeApplyCollisionWithEnemy = (enemyState: EnemyState) => (
       movement: bounceUp(playerState.movement),
     };
     return [newPlayerState, killEnemyWhenBounceOnHead(enemyState)];
-  } else if ((colitionHit === "LEFT" || colitionHit === "RIGHT") && !enemyState.isDead) {
+  } else if (
+    (colitionHit === "LEFT" || colitionHit === "RIGHT") &&
+    !enemyState.isDead
+  ) {
     return [{ ...playerState, isDead: true }, enemyState];
   } else {
     return [playerState, enemyState];
   }
+};
+
+export const applyCollitions = (state: StageState) => {
+  const playerHitBox = getHitBox(
+    state.mario.movement.position,
+    state.mario.sprite.coordinates.size
+  );
+  state.mario.movement = applyCollisionWithStage(
+    state,
+    state.mario.movement,
+    playerHitBox,
+    [],
+    state.mario.sprite.coordinates
+  );
+
+  state.enemies.map((enemy) => {
+    const sprite = getSprite(enemy.type);
+    const hitBox = getHitBox(enemy.movement.position, sprite.size);
+    const [newPlayerState, newEnemyState] = applyCollisionWithEnemy(
+      enemy,
+      playerHitBox,
+      state.mario
+    );
+    state.mario = newPlayerState;
+    enemy = newEnemyState;
+    enemy.movement = applyCollisionWithStage(
+      state,
+      enemy.movement,
+      hitBox,
+      enemy.traits,
+      sprite
+    );
+  });
+  return state;
 };
 
 const killEnemyWhenBounceOnHead = (enemy: EnemyState) => {
@@ -175,12 +213,12 @@ const bounceUp = (movement: Movement) => {
 
 const breakWhenHitBottom = (
   hitSide: HitSide,
-  patternState: PatternState,   
-): PatternState => {  
-  if(hitSide === "BOTTOM") {
+  patternState: PatternState
+): PatternState => {
+  if (hitSide === "BOTTOM") {
     return {
       ...patternState,
-    }
+    };
   }
   return patternState;
-}
+};
