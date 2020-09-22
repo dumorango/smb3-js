@@ -1,5 +1,28 @@
-import { InputEventStream } from "./../input/types";
-import { Movement } from "./types";
+import { Movement } from "./movement";
+
+export type Input = "RIGHT" | "LEFT" | "JUMP";
+
+export type Action = "PRESS" | "RELEASE";
+
+export type InputEvent = {
+  input: Input;
+  action: Action;
+};
+
+export type KeysMap = {
+  left: string;
+  right: string;
+  jump: string;
+};
+
+type KeyCode = string;
+
+export type KeyMap = {
+  [key in Input]: KeyCode;
+}; 
+
+export type InputEventStream = AsyncGenerator<InputEvent>;
+
 
 const setAccelerationX = (accX: number) => (movement: Movement) => ({
   ...movement,
@@ -35,7 +58,7 @@ const setVelocityY = (velocityY: number) => (movement: Movement) => ({
 const setJumpVelocity = setVelocityY(-4);
 
 const setJumpVelocityIfStopped = (movement: Movement) => {
-  if(movement.velocity.y === 0) { //?
+  if(movement.velocity.y === 0) {
    return setJumpVelocity(movement);
   } else {
     return movement;
@@ -44,10 +67,30 @@ const setJumpVelocityIfStopped = (movement: Movement) => {
 
 type ApplyMovement = (movement: Movement) => Movement;
 
+async function* getInputStream(keyMap: KeyMap) {
+  while (true) {
+    yield new Promise<InputEvent>((resolve) => {
+      for (const key in keyMap) {
+        const input = key as Input;
+        document.addEventListener("keydown", (event) => {
+          if (event.code === keyMap[input]) {
+            resolve({ input, action: "PRESS" });
+          }
+        });
+        document.addEventListener("keyup", (event) => {
+          if (event.code === keyMap[input]) {
+            resolve({ input, action: "RELEASE" });
+          }
+        });
+      }
+    });
+  }
+}
+
 export async function* getPlayerMovementStreamByInput(  
-  inputEventStream: InputEventStream
+  keyMap:  Record<Input, KeyCode>
 ): AsyncGenerator<ApplyMovement> {
-  for await (const inputEvent of inputEventStream) {
+  for await (const inputEvent of getInputStream(keyMap)) {
     switch (inputEvent.input) {
       case "RIGHT":
         switch (inputEvent.action) {
