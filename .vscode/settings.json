@@ -1,3 +1,4 @@
 {
-  "jest.showCoverageOnLoad": true
+  "jest.showCoverageOnLoad": true,
+  "typescript.tsdk": "/Users/dumorango/workspace/smb3-js/node_modules/typescript/lib"
 }

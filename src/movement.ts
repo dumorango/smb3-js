@@ -1,13 +1,27 @@
-import { StageState } from "./../stage/types/state";
-import {
-  Acceleration,
-  Velocity,
-  Position,
-  AccelerationConfig,
-  Movement,
-} from "./types";
+type AccelerationConfig = {
+  maxSpeed: number;
+  gravity: number;
+  friction: number;
+};
 
-const applyVelocity = (position: Position, velocity: Velocity) => ({
+type Coordinates = {
+  x: number;
+  y: number;
+};
+
+export type Position = Coordinates;
+
+type Velocity = Coordinates;
+
+type Acceleration = Coordinates;
+
+export type Movement = {
+  velocity: Velocity;
+  acceleration: Acceleration;
+  position: Position;
+};
+
+export const applyVelocity = (position: Position, velocity: Velocity) => ({
   y: position.y + velocity.y,
   x: position.x + velocity.x,
 });
@@ -54,22 +68,8 @@ const applyAcceleration = (config: AccelerationConfig, movement: Movement) => {
   return newVelocityY;
 };
 
-export const applyMovementToState = (
-  state: StageState,
-  accelerationConfig: AccelerationConfig
-) => {
-  const applyMovement = (movement: Movement) => ({
-    acceleration: movement.acceleration,
-    velocity: applyAcceleration(accelerationConfig, movement),
-    position: applyVelocity(movement.position, movement.velocity),
-  });
-
-  const { mario, enemies } = state;
-
-  mario.movement = applyMovement(mario.movement);
-  for (const enemy of enemies) {
-    enemy.movement = applyMovement(enemy.movement);
-  }
-  
-  return state;
-};
+export const applyMovement = (config: AccelerationConfig, movement: Movement) => ({
+  acceleration: movement.acceleration,
+  velocity: applyAcceleration(config, movement),
+  position: applyVelocity(movement.position, movement.velocity),
+});
