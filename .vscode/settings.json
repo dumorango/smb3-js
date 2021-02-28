@@ -1,4 +1,5 @@
 {
   "jest.showCoverageOnLoad": true,
-  "typescript.tsdk": "/Users/dumorango/workspace/smb3-js/node_modules/typescript/lib"
+  "typescript.tsdk": "/Users/dumorango/workspace/smb3-js/node_modules/typescript/lib",
+  "wallaby.node": "~/.nvm/versions/node/v13.7.0/bin/node"
 }

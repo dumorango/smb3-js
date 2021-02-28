@@ -5,7 +5,7 @@ const INITIAL_POSITION = {
 
 const screenSizeVeryBottomGround = {
   pattern: {
-    type: "GROUND",
+    type: "GROUND" as const,
     length: 16,
   },
   position: {
@@ -24,7 +24,7 @@ export const goombaKillsMario = {
   ],
   enemies: [
     {
-      type: "GOOMBA",
+      type: "GOOMBA" as const,
       position: {
         x: 200,
         y: 150,
@@ -37,7 +37,7 @@ export const goombaKillsMario = {
 };
 
 const pipe = {
-  type: "PIPE",
+  type: "PIPE" as const,
   height: 2,
 };
 
@@ -69,7 +69,7 @@ export const marioKillsGoomba = {
   ],
   enemies: [
     {
-      type: "GOOMBA",
+      type: "GOOMBA" as const,
       position: {
         x: 130,
         y: 180,
@@ -81,5 +81,27 @@ export const marioKillsGoomba = {
       x: 130,
       y: 150
     },
+  },
+};
+
+export const marioBreaksBlock = {
+  layers: [
+    {
+      patterns: [
+        screenSizeVeryBottomGround,
+        {
+          pattern: { type: "BRICK" as const },
+          position: {
+            x: 1,
+            y: 9,
+          },
+        }
+      ],
+    },
+  ],
+  enemies: [
+  ],
+  player: {
+    position: INITIAL_POSITION,
   },
 };

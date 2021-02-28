@@ -15,12 +15,7 @@ context.imageSmoothingEnabled = false;
 context.filter = "none";
 context.scale(3, 3);
 
-
-export const makeDrawSprite = (
-  spritesImages: Map<SpriteImage, HTMLImageElement>
-) => ({ image, coordinates }: Sprite, shouldDrawBorders: boolean = false) => (
-  position: Position
-) => {    
+export const drawSprite = ({ coordinates }: Sprite, position: Position, img: HTMLImageElement, shouldDrawBorders: boolean = false) => {
   const { position: spritePosition, size } = coordinates;
   const { width, height } = size;
   if (shouldDrawBorders) {
@@ -29,8 +24,6 @@ export const makeDrawSprite = (
     context.strokeStyle = "red";
     context.stroke();
   }
-
-  const img = spritesImages.get(image)!;
 
   context.drawImage(
     img,

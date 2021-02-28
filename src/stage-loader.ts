@@ -4,7 +4,8 @@ import {
   Position,
   TiledLayerDesign,
   PatternType,
-  PatternSpawnPoint} from "./types";
+  PatternSpawnPoint,
+  Trait} from "./types";
 import { TILE_SIZE } from "./tiled-sprites";
 
 const goomba = {
@@ -43,13 +44,15 @@ export const makeGoomba = (initialPosition: Position) => {
   };  
 }
 
-const getPatternTraits = (patternType: PatternType) => {
+const getPatternTraits = (patternType: PatternType): Trait[]  => {
   switch (patternType) {
     case "GROUND":
     case "PIPE":
       return ["SOLID" as const];
     case "BRICK":
       return ["SOLID" as const, "BREAKABLE" as const];
+    default:
+      return [];
   }
 };
 
